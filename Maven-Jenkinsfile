@@ -1,0 +1,35 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage ('scm checkout or download the code')
+        { steps { git branch: 'master', url: 'https://github.com/prakashk0301/maven-project' } }
+
+        stage ('execute unit test framework')
+        {steps { withMaven(globalMavenSettingsConfig: '88067031-b704-4db8-9f10-43532cc29286', jdk: 'LocalJDK', maven: 'LocalMVN', mavenSettingsConfig: '437a1625-ac9f-453b-99a1-53bbd6165f5c', traceability: true) 
+          { sh 'mvn test' } 
+//           post {
+//             always {
+//                 junit 'target/surefire-reports/*.xml'    //generate unit test xml report, junit is one of the testing tool
+//                    }
+//                }
+        }}
+
+        stage ('generate deployable pacakge')
+        {steps { withMaven(globalMavenSettingsConfig: '88067031-b704-4db8-9f10-43532cc29286', jdk: 'LocalJDK', maven: 'LocalMVN', mavenSettingsConfig: '437a1625-ac9f-453b-99a1-53bbd6165f5c', traceability: true) 
+          { sh 'mvn clean package' }     //clean is to delete all the files from workspace before package creation
+        } }
+
+
+// we can sonarqube stage. sonar analysis and sonar report publish
+
+        stage ('maven install goal')
+        {steps { withMaven(globalMavenSettingsConfig: '88067031-b704-4db8-9f10-43532cc29286', jdk: 'LocalJDK', maven: 'LocalMVN', mavenSettingsConfig: '437a1625-ac9f-453b-99a1-53bbd6165f5c', traceability: true) 
+          { sh 'mvn install' }  
+        } }
+
+// deploy the artifact to dev , qa env
+     }
+
+}

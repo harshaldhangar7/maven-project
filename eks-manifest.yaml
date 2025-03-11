@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: 040872219986.dkr.ecr.eu-central-1.amazonaws.com/my-ecr:latest
+        ports:
+        - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: "webapp-myapp-svc"             #name of service
+spec:                               #service and pod connection properties
+  selector:                         #the selector value of service should match with pod "Label"
+    app: myapp                    #key and value
+  ports:
+    - protocol: "TCP"                   #TCP, UDP, TLS
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer 

@@ -1,0 +1,22 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage ('scm checkout or download the code')
+        { steps { git branch: 'master', url: 'https://github.com/prakashk0301/maven-project' } }
+
+        stage ('execute unit test framework')
+        {steps { withMaven(globalMavenSettingsConfig: 'd21e6d6d-ca32-4dc5-8e9f-5b0349019e1d', jdk: 'LocalJDK', maven: 'LocalMVN', mavenSettingsConfig: 'f0970571-2fc3-4564-bf1b-58673d0ec37c', traceability: true) 
+          { sh 'mvn test' } 
+        }}
+
+        stage ('generate deployable pacakge')
+        {steps { withMaven(globalMavenSettingsConfig: 'd21e6d6d-ca32-4dc5-8e9f-5b0349019e1d', jdk: 'LocalJDK', maven: 'LocalMVN', mavenSettingsConfig: 'f0970571-2fc3-4564-bf1b-58673d0ec37c', traceability: true) 
+          { sh 'mvn clean package' }     //clean is to delete all the files from workspace before package creation
+        } }
+
+        stage ('ansible-ci-cd')
+        {steps { sshPublisher(publishers: [sshPublisherDesc(configName: 'ansible-master', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'ansible-playbook /etc/ansible/playbooks/tomcat-playbook.yaml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '//etc//ansible//playbooks//', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'tomcat-playbook.yaml, **/*.war')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)]) }}
+    
+}} 

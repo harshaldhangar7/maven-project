@@ -1,0 +1,38 @@
+- hosts: amazonweb
+  become: yes
+  tasks:
+    - name: install jdk on node
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+        update_cache: yes
+
+    - name: download tomcat package or tar from offiical website on remote server
+      get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.80/bin/apache-tomcat-9.0.80.tar.gz
+        dest: /opt
+
+    - name: untar tomcat package
+      unarchive:
+        src: /opt/apache-tomcat-9.0.80.tar.gz
+        dest: /opt
+        remote_src: yes             	#if this value is no then ansible will gz file on master
+
+    - name: delete gz file after untar   #file module can be used
+      file:
+        path: /opt/apache-tomcat-9.0.80.tar.gz
+        state: absent
+
+
+    - name: start catalina service    	#we can use CMD or SHELL module
+      command: nohup /opt/apache-tomcat-9.0.80/bin/startup.sh
+
+    - name: copy artifacts 
+      copy:
+        src: /etc/ansible/playbooks/webapp/target/webapp.war                       #ansible master
+        dest: /opt/apache-tomcat-9.0.80/webapps/          #ansible node
+ 
+#    - name: download war file from jenkins
+#      get_url:
+#        url: https://github.com/AKSarav/SampleWebApp/raw/master/dist/SampleWebApp.war
+#        dest: /opt/apache-tomcat-9.0.80/webapps/
