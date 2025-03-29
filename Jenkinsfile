@@ -30,6 +30,7 @@ pipeline {
 }
             }
         }
+        // CD (Continuous Deployment) - Deploy the code to Devlop environment
        stage('Deploy the code on Tomcat Server') {
         steps {
             sshagent(['DEVCICD']) {
