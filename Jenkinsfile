@@ -29,13 +29,13 @@ pipeline {
             }
         }
         // CD (Continuous Deployment) - Deploy the code to Devlop environment
-        stage('Deploy the code on Tomcat Server') {
-            steps {
-                sshagent(['DEVCICD']) {
-                    sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
-                }
-            }
-        }
+        //stage('Deploy the code on Tomcat Server') {
+          //  steps {
+            //    sshagent(['DEVCICD']) {
+              //      sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
+                //}
+         //   }
+       // }
     }
 }
 //sh 'scp -o StrictHostkeyCheking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
