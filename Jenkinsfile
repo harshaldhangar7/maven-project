@@ -1,30 +1,38 @@
 pipeline {
     agent any
     stages {
-        stage('scm checkout') {
+        // Continuous Integration (CI)
+        stage('git scm checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/kumargaurav039/maven-project.git'
+                git branch: 'main', url: 'https://github.com/harshaldhangar7/maven-project.git'
+            }
+        }
+        stage('validate the code') {
+            steps {
+                withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                    sh 'mvn validate'
+                }
             }
         }
         stage('compile the job') //validate then compile
         {
             steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
-                    sh 'mvn validate'
-                }
-            }
-        }
-        stage('compile the code') {
-            steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+               withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
                     sh 'mvn compile'
                 }
             }
         }
-        stage('package the code') {
+        stage('execute unit test framework') {
             steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
-                    sh 'mvn clean package'
+                withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                    sh 'mvn test'
+                }
+            }
+        }
+        stage('build the code') {
+            steps {
+               withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                    sh 'mvn clean -B -DskipTests package'
                 }
             }
         }
@@ -43,4 +51,3 @@ pipeline {
         }
     }
 }
-//sh 'scp -o StrictHostkeyCheking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
