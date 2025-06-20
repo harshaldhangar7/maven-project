@@ -9,33 +9,45 @@ pipeline {
         }
         stage('validate the code') {
             steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
                     sh 'mvn validate'
                 }
             }
         }
-        stage('compile the code') {
+        stage('compile the job') //validate then compile
+        {
             steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+               withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
                     sh 'mvn compile'
                 }
             }
         }
-        stage('package the code') {
+        stage('execute unit test framework') {
             steps {
-                withMaven(globalMavenSettingsConfig: '', jdk: 'JAVA_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
-                    sh 'mvn clean package'
+                withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                    sh 'mvn test'
                 }
             }
         }
-        // CD (Continuous Deployment) - Deploy the code to Devlop environment
-        stage('Deploy the code on Tomcat Server') {
+        stage('build the code') {
             steps {
-                sshagent(['DEVCICD']) {
-                    sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
+               withMaven(globalMavenSettingsConfig: '', jdk: 'JDK_HOME', maven: 'MVN_HOME', mavenSettingsConfig: '', traceability: true) {
+                    sh 'mvn clean -B -DskipTests package'
+                }
+            }
+        }
+        stage('create docker image') {
+            steps {
+                sh 'docker build -t kubharshal/docker_cicd:latest .'
+            }
+        }
+        stage('push docker image to dockerhub') {
+            steps {
+                
+                withDockerRegistry(credentialsId: 'docker_cicd', url: 'https://index.docker.io/v1/') {
+                    sh 'docker push kubharshal/docker_cicd:latest'
                 }
             }
         }
     }
 }
-//sh 'scp -o StrictHostkeyCheking=no webapp/target/webapp.war ec2-user@172.31.11.185:/usr/share/tomcat/webapps'
